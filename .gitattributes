@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+*.astro linguist-language=HTML
+*.css linguist-language=CSS
+*.sql linguist-language=SQL
+
+package-lock.json binary

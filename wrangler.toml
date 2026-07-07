@@ -1,0 +1,5 @@
+# Root wrangler.toml — used by Cloudflare Pages for build-output hint only.
+# The cron Worker lives in worker/wrangler.toml (deploy via `npm run worker:deploy`).
+name = "folio"
+compatibility_date = "2025-04-01"
+pages_build_output_dir = "./dist"

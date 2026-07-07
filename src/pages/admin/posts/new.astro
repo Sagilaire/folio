@@ -1,0 +1,22 @@
+---
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import AdminLayout from "@/components/templates/AdminLayout.astro";
+import Editor from "@/components/organisms/Editor";
+
+const initial = {
+  id: null,
+  title: "",
+  slug: "",
+  excerpt: "",
+  content: "",
+  cover_image: "",
+  status: "draft" as const,
+  scheduled_for: null,
+  published_at: null,
+};
+---
+<BaseLayout title="New article" noIndex>
+  <AdminLayout title="New article" subtitle="Empty draft. Start typing — autosave kicks in after 2 s of idle.">
+    <Editor client:only="react" initial={initial} />
+  </AdminLayout>
+</BaseLayout>

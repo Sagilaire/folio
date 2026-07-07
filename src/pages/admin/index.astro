@@ -1,0 +1,66 @@
+---
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import AdminLayout from "@/components/templates/AdminLayout.astro";
+import { listOwn } from "@/lib/posts/repo";
+import { fmtDateTime } from "@/lib/utils/date";
+
+const supabase = Astro.locals.supabase;
+const user = Astro.locals.session?.user;
+if (!supabase || !user) return Astro.redirect("/login", 302);
+
+const posts = await listOwn(supabase, 50);
+
+const stats = {
+  total: posts.length,
+  published: posts.filter((p) => p.status === "published").length,
+  scheduled: posts.filter((p) => p.status === "scheduled").length,
+  drafts: posts.filter((p) => p.status === "draft").length,
+};
+---
+<BaseLayout title="Editor" noIndex>
+  <AdminLayout title={`Welcome, ${user.email?.split("@")[0]}`} subtitle="Your editorial workspace.">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: var(--sp-4); margin-bottom: var(--sp-6);">
+      {[
+        { label: "Total posts",   value: stats.total,     pill: "pill--draft" },
+        { label: "Published",     value: stats.published, pill: "pill--published" },
+        { label: "Scheduled",     value: stats.scheduled, pill: "pill--scheduled" },
+        { label: "Drafts",        value: stats.drafts,    pill: "pill--draft" },
+      ].map((s) => (
+        <div class="card stack gap-2">
+          <span class={`pill ${s.pill}`}>{s.label}</span>
+          <strong class="display display-md serif" style="font-size: var(--fs-40); margin:0;">{s.value}</strong>
+        </div>
+      ))}
+    </div>
+
+    <div class="row between" style="margin-bottom: var(--sp-4);">
+      <h2 class="display display-md serif" style="margin:0;">Your posts</h2>
+      <a href="/admin/posts/new" class="btn btn--primary">+ New article</a>
+    </div>
+
+    {posts.length === 0 ? (
+      <div class="card card--flat stack gap-3 center" style="padding: var(--sp-8); border-style: dashed;">
+        <span class="eyebrow">Empty inbox</span>
+        <h3 class="display display-md serif" style="margin:0;">Your first article</h3>
+        <p class="muted">Click <strong>New article</strong> to open the side-by-side editor.</p>
+      </div>
+    ) : (
+      <div class="stack gap-2">
+        {posts.slice(0, 10).map((p) => (
+          <a href={`/admin/posts/${p.id}/edit`} class="card card--hover row between" style="text-decoration:none; color:inherit; gap: var(--sp-4);">
+            <div class="stack gap-1">
+              <span class="serif" style="font-size: var(--fs-20); font-weight: 600;">
+                {p.title || <span class="muted">Untitled</span>}
+              </span>
+              <span class="muted mono" style="font-size: var(--fs-12);">/posts/{p.slug || "(no-slug)"}</span>
+            </div>
+            <div class="row gap-3 muted" style="font-size: var(--fs-12);">
+              <span class={`pill pill--${p.status}`}>{p.status}</span>
+              <span>{fmtDateTime(p.updated_at)}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </AdminLayout>
+</BaseLayout>

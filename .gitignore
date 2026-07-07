@@ -1,0 +1,33 @@
+# Astro
+.astro/
+dist/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars*
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Editors
+.vscode/
+.idea/
+.DS_Store
+
+# Test output
+coverage/

@@ -1,0 +1,25 @@
+---
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import AuthForm from "@/components/organisms/AuthForm.tsx";
+
+const returnTo = Astro.url.searchParams.get("return") ?? "/admin";
+const user = Astro.locals.session?.user;
+
+if (user) {
+  return Astro.redirect(returnTo, 302);
+}
+---
+<BaseLayout title="Sign in" noIndex bodyClass="auth">
+  <section class="container container-narrow" style="padding: var(--sp-8) 0;">
+    <div class="card stack gap-4" style="padding: var(--sp-6);">
+      <div class="stack gap-2">
+        <span class="eyebrow">FOLIO editor</span>
+        <h1 class="display display-md serif" style="margin:0;">Sign in to write</h1>
+        <p class="muted" style="margin:0;">
+          Use email + password, or create a journalist account. No analytics, no tracking.
+        </p>
+      </div>
+      <AuthForm client:load returnTo={returnTo} />
+    </div>
+  </section>
+</BaseLayout>

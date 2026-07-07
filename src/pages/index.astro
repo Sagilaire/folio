@@ -1,0 +1,85 @@
+---
+import "@/styles/global.css";
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import { BRAND } from "@/lib/site";
+
+const features = [
+  {
+    eyebrow: "Editor ↔ Reader",
+    title: "Lo que escribes es lo que publicas",
+    body: "Markdown/MDX en el editor, HTML idéntico al publicado, sin pasos intermedios.",
+  },
+  {
+    eyebrow: "Side-by-side",
+    title: "Vista previa sincronizada",
+    body: "Editor a la izquierda, render exacto a la derecha, scroll sincronizado.",
+  },
+  {
+    eyebrow: "Cloud",
+    title: "Auth y drafts privados por periodista",
+    body: "Supabase + Row Level Security: cada autor solo ve sus borradores.",
+  },
+  {
+    eyebrow: "Schedule",
+    title: "Publica cuando quieras",
+    body: "Cron worker en Cloudflare publica automáticamente a la hora programada.",
+  },
+];
+---
+<BaseLayout
+  title={BRAND.name}
+  description={BRAND.description}
+  bodyClass="home"
+>
+  <section class="container" style="padding: var(--sp-9) 0 var(--sp-8);">
+    <div class="container-narrow stack gap-5 fade-in">
+      <span class="eyebrow">Editorial CMS · Open source</span>
+      <h1 class="display display-xl" style="margin:0;">
+        {BRAND.tagline}.
+      </h1>
+      <p class="serif" style="font-size: var(--fs-24); color: var(--ink-2); max-width: 60ch; line-height: 1.4;">
+        FOLIO elimina el paso intermedio entre el editor y el lector.
+        Los periodistas independientes publican en minutos, no en horas,
+        con la confianza de que lo que ven al escribir es exactamente lo
+        que verá su audiencia.
+      </p>
+      <div class="row gap-3" style="margin-top: var(--sp-3);">
+        <a href="/posts" class="btn btn--lg btn--primary">Leer artículos</a>
+        <a href="/login" class="btn btn--lg btn--ghost">Abrir el editor →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" style="padding-bottom: var(--sp-9);">
+    <div
+      class="stack gap-6"
+      style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-5);"
+    >
+      {features.map((f) => (
+        <article class="card card--hover stack gap-2">
+          <span class="eyebrow">{f.eyebrow}</span>
+          <h3 class="serif" style="font-size: var(--fs-20); margin: var(--sp-1) 0;">{f.title}</h3>
+          <p class="muted" style="margin:0; font-size: var(--fs-14); line-height: 1.55;">{f.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: var(--sp-7) 0;">
+    <div class="card card--flat" style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--sp-6); align-items:center; background: var(--ink); color: var(--accent-ink);">
+      <div class="stack gap-3">
+        <span class="eyebrow" style="color: var(--accent);">Demo screenshot</span>
+        <h2 class="display display-md" style="margin:0;">Editor con preview en vivo</h2>
+        <p style="opacity:0.8; max-width: 50ch;">El panel izquierdo es markdown; el derecho es el render EXACTO que verá el lector. Sin !important, sin iframes, sin juegos: el mismo template.</p>
+      </div>
+      <div class="serif mdx-body" style="background:#fff; color: var(--ink); padding: var(--sp-5); border-radius: var(--radius-3); font-size: var(--fs-14);">
+        <h2 class="serif" style="font-family: var(--serif); font-size: var(--fs-24); margin: 0 0 var(--sp-3);"># Cómo publicar en 8 minutos</h2>
+        <p style="margin:0 0 var(--sp-3);">
+          Antes el flujo <strong>Word → Notion → CMS → publicar</strong> consumía 40 min por artículo.
+          Con FOLIO, la fuente se renderiza directo...
+        </p>
+        <aside class="mdx-callout mdx-callout--tip" style="margin:0;">Markdown + same pipeline = WYSIWYG</aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

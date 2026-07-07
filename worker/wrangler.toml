@@ -1,0 +1,14 @@
+# Worker-only config. This is read by `wrangler deploy`/`wrangler dev`
+# from `cd worker && wrangler ...`. Secrets (`vars.SUPABASE_URL`,
+# `vars.SUPABASE_SERVICE_ROLE_KEY`) are set via `wrangler secret put …`.
+name = "folio-cron"
+main = "index.ts"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Run every minute, scan for posts due to publish.
+[triggers]
+crons = ["* * * * *"]
+
+[observability]
+enabled = true

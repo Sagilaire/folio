@@ -1,0 +1,30 @@
+---
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import AdminLayout from "@/components/templates/AdminLayout.astro";
+import Editor from "@/components/organisms/Editor";
+import { getOwnById } from "@/lib/posts/repo";
+
+const { id } = Astro.params;
+const supabase = Astro.locals.supabase;
+if (!supabase || !id) return Astro.redirect("/admin/posts", 302);
+
+const post = await getOwnById(supabase, id);
+if (!post) return new Response("Not found", { status: 404 });
+
+const initial = {
+  id: post.id,
+  title: post.title,
+  slug: post.slug,
+  excerpt: post.excerpt ?? "",
+  content: post.content,
+  cover_image: post.cover_image ?? "",
+  status: post.status,
+  scheduled_for: post.scheduled_for,
+  published_at: post.published_at,
+};
+---
+<BaseLayout title={`Edit: ${post.title}`} noIndex>
+  <AdminLayout title="Edit article" subtitle={post.status === "published" ? "Live at /posts/" + post.slug : "Editing draft."}>
+    <Editor client:only="react" initial={initial} />
+  </AdminLayout>
+</BaseLayout>

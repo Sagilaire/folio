@@ -1,0 +1,44 @@
+---
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import PostCard from "@/components/molecules/PostCard.astro";
+import { listPublished } from "@/lib/posts/repo";
+import type { PostWithAuthor } from "@/lib/types";
+
+const supabase = Astro.locals.supabase;
+let posts: PostWithAuthor[] = [];
+if (supabase) {
+  try {
+    posts = await listPublished(supabase, 50);
+  } catch (e) {
+    console.error(e);
+  }
+}
+---
+<BaseLayout title="All articles" description="Published articles independent journalists wrote with FOLIO.">
+  <section class="container" style="padding: var(--sp-7) 0;">
+    <div class="stack gap-3">
+      <span class="eyebrow">Latest</span>
+      <h1 class="display display-lg" style="margin:0;">Articles</h1>
+      <p class="muted serif" style="font-size: var(--fs-20); max-width: 60ch;">
+        Long-form writing from independent journalists. WYSIWYG from draft to reader — no reformatting.
+      </p>
+    </div>
+  </section>
+
+  <section class="container" style="padding-bottom: var(--sp-8);">
+    {posts.length === 0 ? (
+      <div class="card card--flat stack gap-3" style="border-style: dashed; text-align: center; padding: var(--sp-8);">
+        <span class="eyebrow">No posts yet</span>
+        <h2 class="display display-md" style="margin:0;">Create the first article</h2>
+        <p class="muted">Sign in as a journalist and click <strong>New article</strong>. Your first draft goes live in minutes.</p>
+        <div style="margin-top: var(--sp-3);">
+          <a href="/login" class="btn btn--lg btn--primary">Sign in</a>
+        </div>
+      </div>
+    ) : (
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-5);">
+        {posts.map((p) => <PostCard post={p} />)}
+      </div>
+    )}
+  </section>
+</BaseLayout>

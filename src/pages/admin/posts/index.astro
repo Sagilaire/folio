@@ -1,0 +1,67 @@
+---
+import BaseLayout from "@/components/templates/BaseLayout.astro";
+import AdminLayout from "@/components/templates/AdminLayout.astro";
+import { listOwn } from "@/lib/posts/repo";
+import { fmtDateTime } from "@/lib/utils/date";
+
+const supabase = Astro.locals.supabase;
+if (!supabase) return Astro.redirect("/login", 302);
+
+const posts = await listOwn(supabase, 100);
+const filter = Astro.url.searchParams.get("status") ?? "all";
+const filtered = filter === "all" ? posts : posts.filter((p) => p.status === filter);
+---
+<BaseLayout title="All my posts" noIndex>
+  <AdminLayout title="Posts" subtitle="Search, filter and open any draft or live article.">
+    <div class="row between" style="margin-bottom: var(--sp-4); display:flex; flex-wrap:wrap; gap: var(--sp-3);">
+      <div class="row gap-2">
+        {["all","draft","scheduled","published","archived"].map((s) => (
+          <a
+            href={`/admin/posts?status=${s}`}
+            class={`btn btn--sm ${filter === s ? "btn--primary" : "btn--ghost"}`}
+          >
+            {s}
+          </a>
+        ))}
+      </div>
+      <a href="/admin/posts/new" class="btn btn--primary">+ New article</a>
+    </div>
+
+    {filtered.length === 0 ? (
+      <div class="card card--flat center muted" style="padding: var(--sp-8); border-style: dashed;">
+        No posts matching this filter.
+      </div>
+    ) : (
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <table class="table" style="width:100%; border-collapse: collapse;">
+          <thead style="background: var(--bg-sunken); font-size: var(--fs-12); color: var(--muted);">
+            <tr>
+              <th style="text-align:left; padding: var(--sp-3);">Title</th>
+              <th style="text-align:left; padding: var(--sp-3);">Slug</th>
+              <th style="text-align:left; padding: var(--sp-3);">Status</th>
+              <th style="text-align:left; padding: var(--sp-3);">Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p) => (
+              <tr style="border-top: 1px solid var(--border); font-size: var(--fs-14);">
+                <td style="padding: var(--sp-3);">
+                  <a href={`/admin/posts/${p.id}/edit`} style="color: var(--ink); text-decoration: none; font-weight:600;" class="serif">
+                    {p.title || <span class="muted">Untitled</span>}
+                  </a>
+                </td>
+                <td style="padding: var(--sp-3);" class="mono muted">/posts/{p.slug}</td>
+                <td style="padding: var(--sp-3);"><span class={`pill pill--${p.status}`}>{p.status}</span></td>
+                <td style="padding: var(--sp-3);" class="muted">{fmtDateTime(p.updated_at)}</td>
+                <td style="padding: var(--sp-3); text-align:right;">
+                  <a href={`/admin/posts/${p.id}/edit`} class="btn btn--sm btn--ghost">Open</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </AdminLayout>
+</BaseLayout>

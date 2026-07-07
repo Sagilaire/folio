@@ -1,0 +1,18 @@
+---
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container row between" style="flex-wrap:wrap; gap:24px;">
+    <div class="stack gap-1">
+      <strong class="serif">FOLIO</strong>
+      <span class="muted" style="font-size:var(--fs-12);">
+        Editorial CMS · Astro · MDX · Supabase · Cloudflare
+      </span>
+    </div>
+    <div class="row gap-5 muted" style="font-size:var(--fs-12);">
+      <a href="/posts" style="color:inherit;">Articles</a>
+      <a href="/login" style="color:inherit;">Editor sign in</a>
+      <span>© {year}</span>
+    </div>
+  </div>
+</footer>
