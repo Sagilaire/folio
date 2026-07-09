@@ -3,9 +3,12 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 
 // Per-request middleware: build Supabase client, resolve session, guard /admin/*.
 export const onRequest: MiddlewareHandler = async (context, next) => {
-  const env = context.locals.runtime.env;
-  const supabaseUrl = env.SUPABASE_URL;
-  const supabaseKey = env.SUPABASE_ANON_KEY;
+  // process.env is populated by `env_file: .env` in docker-compose.yml.
+  // import.meta.env falls back to the same values during `astro build`.
+  const supabaseUrl =
+    process.env.SUPABASE_URL ?? import.meta.env.SUPABASE_URL;
+  const supabaseKey =
+    process.env.SUPABASE_ANON_KEY ?? import.meta.env.SUPABASE_ANON_KEY;
 
   context.locals.supabase = null;
   context.locals.session = null;

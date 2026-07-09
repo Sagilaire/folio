@@ -1,17 +1,11 @@
 /// <reference path="../.astro/types.d.ts" />
 
-interface Env {
-  SUPABASE_URL: string;
-  SUPABASE_ANON_KEY: string;
-  SUPABASE_SERVICE_ROLE_KEY?: string;
-}
-
 declare namespace App {
   interface Locals {
-    // We type the cloudflare runtime slice ourselves so the `Env` interface
-    // declared at top-level resolves regardless of @astrojs/cloudflare's
-    // generic type shape across versions.
-    runtime: { env: Env };
+    // Per-request state attached by `src/middleware.ts`. Server-only env
+    // values (SUPABASE_URL etc.) are read at runtime from `process.env`
+    // via `env_file: .env` in docker-compose.yml, and from `import.meta.env`
+    // when running under `astro dev`.
     supabase: import("@supabase/supabase-js").SupabaseClient | null;
     session: {
       user: {

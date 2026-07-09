@@ -1,0 +1,50 @@
+# FOLIO — production docker-compose.
+#
+# Intentionally defines NO `networks:` and NO `volumes:`:
+#   • Networking is attached manually to the nginx-proxy-manager network:
+#         docker network connect nginx_proxy_manager folio-web
+#     (or whatever npm's network name is on your host — `docker network ls`).
+#   • No volumes — state lives in Supabase, not on disk.
+#   • `expose:` (not `ports:`) keeps the container reachable only from
+#     networks it's attached to — safer than publishing 3000 publicly.
+#
+# Env flow:
+#   • Build time: Dockerfile `COPY . .` picks up `.env` so Astro inlines
+#     `PUBLIC_*` vars into the client bundle.
+#   • Runtime: this file's `env_file: .env` populates `process.env` inside
+#     the container for server-only vars (SUPABASE_URL, SUPABASE_ANON_KEY).
+#     `PUBLIC_*` vars are harmless when re-supplied at runtime.
+#
+# Usage on the server after `git clone`:
+#     cp .env.example .env        # edit with real values
+#     docker compose up -d --build
+#     docker network connect nginx_proxy_manager folio-web
+#     docker logs -f folio-web    # confirm startup
+#
+# Subsequent deploys:
+#     git pull && docker compose up -d --build
+#
+services:
+  folio-web:
+    image: folio:latest
+    container_name: folio-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "3000"
+
+    # ── Production hardening — uncomment as desired ──────────────────────
+    # read_only: true
+    # tmpfs:
+    #   - /tmp:size=64m
+    # security_opt:
+    #   - no-new-privileges:true
+    # logging:
+    #   driver: json-file
+    #   options:
+    #     max-size: "10m"
+    #     max-file: "3"

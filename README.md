@@ -115,24 +115,49 @@ shortcode + class-hook pipeline.
 
 ---
 
-## ☁️ Deploy to Cloudflare
+## ☁️ Deploy with Docker (self-hosted)
 
-### A — Deploy the site (`@astrojs/cloudflare`)
+The app targets `@astrojs/node` standalone mode and ships with a production
+Dockerfile + `docker-compose.yml`. Internally listens on **port 3000**;
+network paths, nginx-proxy-manager wiring and volumes are all done by you
+manually so the container stays a clean black box.
+
+### A — Deploy the site (container)
+
+On your server, once after cloning:
 
 ```bash
-npm run build
-# Deploy via Cloudflare Pages (web UI or wrangler). Connect the repo, set:
-#   Build command:    npm run build
-#   Build dir:        dist
-#   Environment vars: PUBLIC_SITE_URL, SUPABASE_URL, SUPABASE_ANON_KEY
+cp .env.example .env        # fill with the same values you use locally
+docker compose up -d --build
+docker network connect nginx_proxy_manager folio-web   # or your npm net name
+docker logs -f folio-web     # confirm "Server listening on http://0.0.0.0:3000"
 ```
 
-### B — Deploy the cron Worker
+Subsequent deploys are a one-liner:
+
+```bash
+git pull && docker compose up -d --build
+```
+
+> 🔁 Whenever you change a `PUBLIC_*` var in `.env`, rebuild with
+> `docker compose up -d --build` — Astro inlines them into the client bundle
+> **at build time**, so a plain restart won't pick them up.
+
+The image is tagged `folio:latest`, the container `folio-web`. Internal
+port is **3000** (`expose:`, not `ports:` — nginx-proxy-manager reaches it
+through the shared network you attached). No custom networks or volumes
+are defined by the compose file.
+
+### B — Deploy the cron Worker (still on Cloudflare)
+
+The scheduled-publish cron keeps living on Cloudflare Workers because that
+runtime ships native cron triggers — cheaper than wiring up a
+self-hosted scheduler just for one minute-by-minute task.
 
 ```bash
 # From the repo root:
 cd worker
-npm i wrangler             # (or pnpm dlx wrangler …)
+npm i wrangler
 wrangler login
 wrangler secret put SUPABASE_URL
 wrangler secret put SUPABASE_SERVICE_ROLE_KEY
@@ -156,7 +181,7 @@ curl https://folio-cron.<your-subdomain>.workers.dev/run
 ## 🏗 Architecture
 
 ```
-                    Astro 5 (Cloudflare Pages, SSR)
+                    Astro 5 (Node standalone, SSR)
 ┌──────────┐   ┌────────────────┐   ┌────────────────┐
 │ /login   │   │ /admin/posts/* │   │ /posts/[slug]  │
 │ AuthForm │   │ Editor island  │   │ unified MD→HTML│
@@ -219,8 +244,10 @@ Service-role key bypasses everything, hence the cron Worker needing it.
 
 ```
 folio/
-├── astro.config.mjs          # SSR + Cloudflare adapter + MDX + React
-├── wrangler.toml             # site deploy hint
+├── astro.config.mjs          # SSR + @astrojs/node standalone + MDX + React
+├── Dockerfile                # multi-stage production build (folio:latest)
+├── docker-compose.yml        # folio-web service, env_file: .env, expose 3000
+├── .dockerignore             # mirrors .gitignore; keeps .env for PUBLIC_* bake-in
 ├── db/schema.sql             # tables, RLS, trigger — paste into Supabase
 ├── src/
 │   ├── env.d.ts              # Astro.locals typing
